@@ -17,6 +17,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - name: Probe rust cache
+        uses: Swatinem/rust-cache@v2
+      - name: Build WASM artifact
+        run: cargo build --release --target wasm32-unknown-unknown
+        working-directory: ./wasm
+      - name: Copy WASM artifact
+        run: cp -f ./wasm/target/wasm32-unknown-unknown/release/based.wasm ./src/based.wasm
+
+      - name: Upload WASM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: based.wasm
+          path: ./src/based.wasm
+
       - name: Probe runner package cache
         uses: awalsh128/cache-apt-pkgs-action@latest
         with:
