@@ -1,7 +1,4 @@
-#import "coder.typ"
-
-#let alphabet-64     = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
-#let alphabet-64-url = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
+#let plugin = plugin("based.wasm")
 
 /// Encodes the given data in base64 format.
 ///
@@ -12,20 +9,21 @@
 ///
 /// Returns: The encoded string.
 #let encode(data, pad: true, url: false) = {
-    let alphabet = if url { alphabet-64-url } else { alphabet-64 }
-    coder.encode(data, alphabet, pad: pad)
+  let flags = bytes((if pad { 1 } else { 0 }, if url { 1 } else { 0 }))
+  str(plugin.encode64(bytes(data), flags))
 }
 
 /// Decodes the given base64 string.
 ///
 /// URL safe characters are automatically converted to their standard
-/// counterparts. Invalid characters are ignored.
+/// counterparts.
 ///
 /// Arguments:
 /// - string: The string to decode.
 ///
 /// Returns: The decoded bytes.
 #let decode(string) = {
-    string = string.replace("-", "+").replace("_", "/")
-    coder.decode(string, alphabet-64)
+  let flags = bytes((0, 0))
+  let string = string.replace("-", "+").replace("_", "/").trim("=", at: end)
+  plugin.decode64(bytes(string), flags)
 }

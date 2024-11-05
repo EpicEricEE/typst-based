@@ -1,7 +1,4 @@
-#import "coder.typ"
-
-#let alphabet-32     = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
-#let alphabet-32-hex = "0123456789ABCDEFGHIJKLMNOPQRSTUV"
+#let plugin = plugin("based.wasm")
 
 /// Encodes the given data in base32 format.
 ///
@@ -12,8 +9,8 @@
 ///
 /// Returns: The encoded string.
 #let encode(data, pad: true, hex: false) = {
-    let alphabet = if hex { alphabet-32-hex } else { alphabet-32 }
-    coder.encode(data, alphabet, pad: pad)
+  let flags = bytes((if pad { 1 } else { 0 }, if hex { 1 } else { 0 }))
+  str(plugin.encode32(bytes(data), flags))
 }
 
 /// Decodes the given base32 string.
@@ -24,6 +21,7 @@
 ///
 /// Returns: The decoded bytes.
 #let decode(string, hex: false) = {
-    let alphabet = if hex { alphabet-32-hex } else { alphabet-32 }
-    coder.decode(string, alphabet)
+  let flags = bytes((0, if hex { 1 } else { 0 }))
+  let string = string.trim("=", at: end)
+  plugin.decode32(bytes(string), flags)
 }
