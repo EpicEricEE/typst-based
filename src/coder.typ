@@ -8,15 +8,15 @@
 #let bin(number, size: none) = {
   let result = while number > 0 {
     (calc.rem(number, 2),)
-    number = calc.floor(number / 2);
+    number = calc.floor(number / 2)
   }
 
   if result == none { result = (0,) }
   if size != none and result.len() < size {
-    result.push(((0,) * (size - result.len())));
+    result.push(((0,) * (size - result.len())))
   }
 
-  return result.rev().flatten();
+  return result.rev().flatten()
 }
 
 /// Convert a binary array to a number.
@@ -26,9 +26,7 @@
 ///
 /// Returns: The number.
 #let dec(array) = {
-  array.enumerate().fold(0, (acc, (i, bit)) => {
-    acc + bit * calc.pow(2, (array.len() - i - 1))
-  })
+  array.reduce((acc, bit) => acc * 2 + bit)
 }
 
 /// Encodes the given data with the given alphabet.
@@ -60,7 +58,7 @@
   if pad {
     let lcm = calc.lcm(8, chunk-size)
     let pad-amount = calc.rem(lcm - calc.rem(bits.len(), lcm), lcm)
-    string += range(int(pad-amount / chunk-size)).map(_ => "=").join("")
+    string += int(pad-amount / chunk-size) *  "="
   }
 
   string
@@ -79,22 +77,18 @@
   chunk-size = int(chunk-size)
   
   string = string.replace("=", "")
+  
+  // Build "reverse alphabet" lookup table.
+  let lookup = alphabet.codepoints()
+    .enumerate()
+    .map(((i, char)) => (char, bin(i, size: chunk-size)))
+    .to-dict()
 
-  let bits = string.codepoints()
-    .map(c => alphabet.position(c))
-    .filter(n => n != none)
-    .map(bin.with(size: chunk-size))
+  let bits = string
+    .codepoints()
+    .map(c => lookup.at(c, default: ()))
     .flatten()
 
-  let pad-amount = calc.rem(bits.len(), 8)
-  if pad-amount > 0 {
-    bits = bits.slice(0, -pad-amount)
-  }
-
-  let byte-array = range(0, bits.len(), step: 8).map(i => {
-    let chunk = bits.slice(i, i + 8)
-    dec(chunk)
-  })
-
+  let byte-array = bits.chunks(8, exact: true).map(dec)
   bytes(byte-array)
 }
