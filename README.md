@@ -17,7 +17,7 @@ You can encode strings, arrays and bytes. The `encode` function will return a st
 ## Example
 
 ```typ
-#import "@preview/based:0.1.0": base64, base32, base16
+#import "@preview/based:0.2.0": base64, base32, base16
 
 #table(
   columns: 3,
